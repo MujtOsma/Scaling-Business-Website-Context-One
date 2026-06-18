@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- v2 -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="AMARA — Women's streetwear rooted in Y2K culture. Canadian drops, built for her." />
@@ -95,11 +96,8 @@
   <script type="text/babel">
     const { createContext, useContext, useState, useEffect, useRef } = React;
 
-    // ── BRAND ───────────────────────────────────────────────────────
-    // Replace 'AMARA' with your brand name here — it propagates everywhere.
     const BRAND_NAME = 'AMARA';
 
-    // ── PRODUCT DATA ────────────────────────────────────────────────
     const PRODUCTS = [
       {
         id:1, name:'Roots Coord Set', dropName:'The Roots Capsule',
@@ -143,7 +141,6 @@
       },
     ];
 
-    // ── CART CONTEXT ────────────────────────────────────────────────
     const CartCtx = createContext(null);
     function CartProvider({children}) {
       const [items,setItems]   = useState([]);
@@ -165,7 +162,6 @@
     }
     function useCart(){return useContext(CartCtx);}
 
-    // ── ICONS ───────────────────────────────────────────────────────
     const IcoBag=({size=22})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>);
     const IcoMenu=({size=22})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>);
     const IcoX=({size=20})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>);
@@ -175,7 +171,6 @@
     const IcoIG=({size=18})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>);
     const IcoTT=({size=18})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34v-7a8.16 8.16 0 004.77 1.52V6.37a4.85 4.85 0 01-1-.32z"/></svg>);
 
-    // ── CART BUTTON ─────────────────────────────────────────────────
     function CartButton({className=''}) {
       const {cartCount,setIsOpen}=useCart();
       return (
@@ -186,7 +181,6 @@
       );
     }
 
-    // ── NAV ─────────────────────────────────────────────────────────
     const NAV_LINKS=['Shop','Lookbook','Story','Drops'];
     function Nav({onNavigate}) {
       const [menuOpen,setMenuOpen]=useState(false);
@@ -217,7 +211,6 @@
       );
     }
 
-    // ── HERO ─────────────────────────────────────────────────────────
     function HeroSection({onNavigate}) {
       return (
         <section className="hero-section w-full">
@@ -230,7 +223,6 @@
       );
     }
 
-    // ── PRODUCT CARD ─────────────────────────────────────────────────
     function ProductCard({product,onNavigate}) {
       const anyLow=Object.values(product.stock).some(s=>s>0&&s<=3);
       const allOut=Object.values(product.stock).every(s=>s===0);
@@ -256,7 +248,6 @@
       );
     }
 
-    // ── CURRENT DROP ─────────────────────────────────────────────────
     function CurrentDrop({onNavigate}) {
       return (
         <section className="py-20 px-4 sm:px-6 max-w-screen-xl mx-auto">
@@ -275,21 +266,19 @@
       );
     }
 
-    // ── BRAND STATEMENT ──────────────────────────────────────────────
     function BrandStatement() {
       return (
         <section className="py-24 sm:py-32 px-4 sm:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <p className="text-[0.6rem] tracking-[0.38em] uppercase text-black/25 mb-10 font-body">Our mission</p>
             <blockquote className="font-display font-black uppercase leading-[1.08] text-[1.95rem] sm:text-[2.55rem] md:text-[3rem] tracking-[0.04em]">
-              "We exist because the culture that built Y2K fashion never got its own brand&nbsp;— so we built it, for her, from the ground up."
+              &ldquo;We exist because the culture that built Y2K fashion never got its own brand&nbsp;&mdash; so we built it, for her, from the ground up.&rdquo;
             </blockquote>
           </div>
         </section>
       );
     }
 
-    // ── LOOKBOOK TEASER ──────────────────────────────────────────────
     const LB_TILES=[{label:'Editorial — Vol. I',shade:'#222'},{label:'Editorial — Vol. II',shade:'#2C2C2C'},{label:'Editorial — Vol. III',shade:'#1A1A1A'}];
     function LookbookTeaser() {
       return (
@@ -312,7 +301,6 @@
       );
     }
 
-    // ── EMAIL CAPTURE ─────────────────────────────────────────────────
     function EmailCapture() {
       const [email,setEmail]=useState('');
       const [submitted,setSubmitted]=useState(false);
@@ -336,7 +324,6 @@
       );
     }
 
-    // ── FOOTER ────────────────────────────────────────────────────────
     function Footer({onNavigate}) {
       return (
         <footer className="bg-near-black text-white py-14 px-4 sm:px-6">
@@ -371,7 +358,7 @@
               </div>
             </div>
             <div className="border-t border-white/[0.06] pt-6 flex flex-col sm:flex-row justify-between gap-2">
-              <p className="text-white/18 text-[0.63rem] font-body">© 2025 {BRAND_NAME}. All rights reserved.</p>
+              <p className="text-white/18 text-[0.63rem] font-body">&copy; 2025 {BRAND_NAME}. All rights reserved.</p>
               <div className="flex gap-4">{['Privacy Policy','Terms','Return Policy'].map(l=><button key={l} className="text-white/18 text-[0.63rem] font-body hover:text-white/50 transition-colors">{l}</button>)}</div>
             </div>
           </div>
@@ -379,12 +366,10 @@
       );
     }
 
-    // ── HOMEPAGE ──────────────────────────────────────────────────────
     function Homepage({onNavigate}) {
       return (<main><HeroSection onNavigate={onNavigate}/><CurrentDrop onNavigate={onNavigate}/><BrandStatement/><LookbookTeaser/><EmailCapture/><Footer onNavigate={onNavigate}/></main>);
     }
 
-    // ── SIZE GUIDE MODAL ──────────────────────────────────────────────
     const SIZE_ROWS=[['XS','30–32"','23–25"','33–35"'],['S','32–34"','25–27"','35–37"'],['M','34–36"','27–29"','37–39"'],['L','36–38"','29–31"','39–41"'],['XL','38–40"','31–33"','41–43"']];
     function SizeGuideModal({onClose}) {
       return (
@@ -407,7 +392,6 @@
       );
     }
 
-    // ── ACCORDION ─────────────────────────────────────────────────────
     function AccordionItem({title,children}) {
       const [open,setOpen]=useState(false);
       return (
@@ -423,7 +407,6 @@
       );
     }
 
-    // ── IMAGE GALLERY ─────────────────────────────────────────────────
     function ImageGallery({product}) {
       const [idx,setIdx]=useState(0);
       const total=product.imgCount;
@@ -460,7 +443,6 @@
       );
     }
 
-    // ── PRODUCT DETAIL PAGE ───────────────────────────────────────────
     function ProductDetailPage({product,onBack,onNavigate}) {
       const {addItem}=useCart();
       const [color,setColor]=useState(product.colors[0]);
@@ -530,10 +512,9 @@
       );
     }
 
-    // ── CART DRAWER ───────────────────────────────────────────────────
     function CartDrawer({onNavigate}) {
       const {items,isOpen,setIsOpen,subtotal,cartCount,removeItem,changeQty}=useCart();
-      useEffect(()=>{document.body.style.overflow=isOpen?'hidden':'';return()=>{document.body.style.overflow=''};},[isOpen]);
+      useEffect(()=>{document.body.style.overflow=isOpen?'hidden':'';return()=>{document.body.style.overflow='';};},[isOpen]);
       function handleShopDrop(){setIsOpen(false);onNavigate('home');}
       return (
         <>
@@ -562,7 +543,7 @@
                         </div>
                         <div className="flex items-center justify-between mt-3">
                           <div className="flex items-center border border-black/14">
-                            <button className="qty-btn" onClick={()=>changeQty(item.key,-1)} aria-label="Decrease">−</button>
+                            <button className="qty-btn" onClick={()=>changeQty(item.key,-1)} aria-label="Decrease">&minus;</button>
                             <span className="w-7 text-center text-sm font-body select-none">{item.qty}</span>
                             <button className="qty-btn" onClick={()=>changeQty(item.key,1)} aria-label="Increase">+</button>
                           </div>
@@ -580,8 +561,8 @@
             {items.length>0&&(
               <div className="flex-shrink-0 border-t border-black/[0.07] px-5 py-5">
                 <div className="flex justify-between text-sm font-body mb-1"><span className="text-black/40">Subtotal</span><span className="font-semibold">${subtotal.toFixed(2)} CAD</span></div>
-                <p className="text-[0.62rem] text-black/22 font-body mb-4">Shipping & taxes calculated at checkout</p>
-                <button className="transition-btn w-full bg-near-black text-white py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase hover:bg-accent">Checkout — ${subtotal.toFixed(2)}</button>
+                <p className="text-[0.62rem] text-black/22 font-body mb-4">Shipping &amp; taxes calculated at checkout</p>
+                <button className="transition-btn w-full bg-near-black text-white py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase hover:bg-accent">Checkout &mdash; ${subtotal.toFixed(2)}</button>
               </div>
             )}
           </div>
@@ -589,7 +570,6 @@
       );
     }
 
-    // ── APP ROOT ──────────────────────────────────────────────────────
     function App() {
       const [page,setPage]=useState('home');
       const [activeProduct,setActiveProduct]=useState(null);
