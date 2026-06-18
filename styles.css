@@ -1,0 +1,219 @@
+/* ================================================================
+   AMARA — Custom Styles
+   Tailwind handles layout/spacing; this file covers:
+     • Cart drawer slide animation
+     • Mobile nav menu expand/collapse
+     • Accordion open/close
+     • Image placeholder textures
+     • Size pill / colour swatch states
+     • Scrollbar styling
+     • Misc transitions Tailwind can't do inline
+   ================================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: #ffffff;
+  color: #0A0A0A;
+  overflow-x: hidden;
+}
+
+/* ── CART DRAWER ──────────────────────────────────────────── */
+.cart-drawer {
+  transform: translateX(100%);
+  transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+.cart-drawer.is-open { transform: translateX(0); }
+
+/* ── MOBILE NAV MENU ──────────────────────────────────────── */
+.mobile-menu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mobile-menu.is-open { max-height: 480px; }
+
+/* ── ACCORDION ────────────────────────────────────────────── */
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.accordion-body.is-open { max-height: 600px; }
+
+/* ── IMAGE PLACEHOLDERS ───────────────────────────────────── */
+.img-placeholder {
+  background-color: #EAE4DC;
+  position: relative;
+  overflow: hidden;
+}
+.img-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -55deg,
+    transparent, transparent 18px,
+    rgba(0,0,0,0.025) 18px, rgba(0,0,0,0.025) 36px
+  );
+}
+
+.img-placeholder-dark {
+  background-color: #252525;
+  position: relative;
+  overflow: hidden;
+}
+.img-placeholder-dark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -55deg,
+    transparent, transparent 18px,
+    rgba(255,255,255,0.03) 18px, rgba(255,255,255,0.03) 36px
+  );
+}
+
+/* ── HERO ─────────────────────────────────────────────────── */
+.hero-section {
+  background-color: #181818;
+  min-height: calc(100vh - 3.5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 4rem;
+}
+
+/* ── NAV LINK UNDERLINE HOVER ─────────────────────────────── */
+.nav-link {
+  position: relative;
+  padding-bottom: 2px;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 1px;
+  background: currentColor;
+  transition: width 0.2s ease;
+}
+.nav-link:hover::after { width: 100%; }
+
+/* ── PRODUCT CARD IMAGE ZOOM ──────────────────────────────── */
+.product-card { cursor: pointer; }
+.product-card .card-img { overflow: hidden; }
+.product-card .card-img .img-placeholder {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.product-card:hover .card-img .img-placeholder { transform: scale(1.04); }
+
+/* ── SIZE PILL ────────────────────────────────────────────── */
+.size-pill {
+  border: 1px solid rgba(10,10,10,0.22);
+  padding: 0.5rem 1rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  cursor: pointer;
+  background: transparent;
+  color: #0A0A0A;
+  line-height: 1;
+}
+.size-pill:hover:not(.is-out):not(.is-selected) {
+  border-color: #0A0A0A;
+  background: #0A0A0A;
+  color: #fff;
+}
+.size-pill.is-selected {
+  background: #0A0A0A;
+  color: #fff;
+  border-color: #0A0A0A;
+}
+.size-pill.is-out {
+  opacity: 0.28;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* ── COLOUR SWATCH ────────────────────────────────────────── */
+.color-swatch {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+  outline-offset: 3px;
+}
+.color-swatch:hover { transform: scale(1.12); }
+.color-swatch.is-selected {
+  border-color: #0A0A0A;
+  transform: scale(1.08);
+}
+
+/* ── QUANTITY STEPPER ─────────────────────────────────────── */
+.qty-btn {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  line-height: 1;
+  transition: background 0.15s;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: #0A0A0A;
+  user-select: none;
+}
+.qty-btn:hover { background: rgba(10,10,10,0.06); }
+
+/* ── DRAWER SCROLL ────────────────────────────────────────── */
+.drawer-scroll {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #d0d0d0 transparent;
+}
+.drawer-scroll::-webkit-scrollbar { width: 4px; }
+.drawer-scroll::-webkit-scrollbar-track { background: transparent; }
+.drawer-scroll::-webkit-scrollbar-thumb {
+  background: #d0d0d0;
+  border-radius: 2px;
+}
+
+/* ── THUMBNAIL STRIP ──────────────────────────────────────── */
+.thumb-strip {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.thumb-strip::-webkit-scrollbar { display: none; }
+
+/* ── MOBILE ADD-TO-BAG BAR ────────────────────────────────── */
+@media (max-width: 767px) {
+  .mobile-atb-bar {
+    animation: slideUpBar 0.25s ease both;
+  }
+}
+@keyframes slideUpBar {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* ── LOOKBOOK TILE ZOOM ───────────────────────────────────── */
+.lookbook-tile { overflow: hidden; cursor: pointer; }
+.lookbook-tile .img-placeholder-dark {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.lookbook-tile:hover .img-placeholder-dark { transform: scale(1.04); }
+
+/* ── TRANSITION BUTTON ────────────────────────────────────── */
+.transition-btn {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
