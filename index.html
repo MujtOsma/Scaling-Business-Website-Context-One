@@ -74,12 +74,12 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#0A0A0A;overflow-x:hid
 .size-pill:hover:not(.is-out):not(.is-selected){border-color:#0A0A0A;background:#0A0A0A;color:#fff}
 .size-pill.is-selected{background:#0A0A0A;color:#fff;border-color:#0A0A0A}
 .size-pill.is-out{opacity:.28;cursor:not-allowed;text-decoration:line-through}
-.color-swatch{width:2rem;height:2rem;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s,border-color .15s}
+.color-swatch{width:2.75rem;height:2.75rem;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s,border-color .15s}
 .color-swatch:hover{transform:scale(1.12)}
 .color-swatch.is-selected{border-color:#0A0A0A;transform:scale(1.08)}
 
-.qty-btn{width:2rem;height:2rem;display:flex;align-items:center;justify-content:center;font-size:1.15rem;line-height:1;transition:background .15s;cursor:pointer;border:none;background:transparent;color:#0A0A0A;user-select:none}
-.qty-btn:hover{background:rgba(10,10,10,.06)}
+.qty-btn{width:2.75rem;height:2.75rem;display:flex;align-items:center;justify-content:center;font-size:1.15rem;line-height:1;transition:background .15s;cursor:pointer;border:none;background:transparent;color:#0A0A0A;user-select:none}
+.qty-btn:hover{background:rgba(10,10,10,.08)}
 .drawer-scroll{-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#d0d0d0 transparent}
 .drawer-scroll::-webkit-scrollbar{width:4px}
 .drawer-scroll::-webkit-scrollbar-track{background:transparent}
@@ -92,6 +92,22 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#0A0A0A;overflow-x:hid
 
 @media(max-width:767px){.mobile-atb-bar{animation:slideUpBar .25s ease both}}
 @keyframes slideUpBar{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+/* iOS safe area insets */
+.safe-pb{padding-bottom:max(0.75rem,env(safe-area-inset-bottom))}
+.safe-pb-lg{padding-bottom:max(1.25rem,env(safe-area-inset-bottom))}
+
+/* Focus styles — visible for keyboard + assistive tech */
+button:focus-visible,a:focus-visible{outline:2px solid #C4622D;outline-offset:3px;border-radius:2px}
+
+/* Respect user motion preferences */
+@media(prefers-reduced-motion:reduce){
+  .reveal{opacity:1!important;transform:none!important;transition:none!important}
+  .img-fade{opacity:1!important;transition:none!important}
+  .ticker-track{animation-play-state:paused!important}
+  .cart-drawer,.mobile-menu,.accordion-body{transition:none!important}
+  .card-img-wrap img,.lb-tile img,.story-img-wrap img{transition:none!important}
+}
 </style>
 </head>
 <body class="bg-white text-near-black font-body antialiased">
@@ -191,7 +207,7 @@ const TT=({s=18})=>html`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="cu
 // ── Cart Button ───────────────────────────────────────────────────────
 function CartBtn({cls=''}){
   const{count,setOpen}=useCart();
-  return html`<button onClick=${()=>setOpen(true)} className=${`relative flex items-center ${cls}`} aria-label="Open bag">
+  return html`<button onClick=${()=>setOpen(true)} className=${`relative flex items-center min-w-[44px] min-h-[44px] justify-center ${cls}`} aria-label="Open bag">
     <${Bag}/>
     ${count>0&&html`<span className="absolute -top-2 -right-2.5 bg-near-black text-white text-[9px] font-bold w-[17px] h-[17px] rounded-full flex items-center justify-center leading-none">${count>9?'9+':count}</span>`}
   </button>`;
@@ -200,7 +216,7 @@ function CartBtn({cls=''}){
 // ── Ticker ────────────────────────────────────────────────────────────
 const TICK_TEXT="FREE SHIPPING OVER $100 CAD  ·  NOW DROPPING: THE ROOTS CAPSULE  ·  TORONTO'S OWN  ·  BUILT FOR HER  ·  Y2K FOREVER  ·  ";
 function Ticker(){
-  return html`<div className="bg-near-black text-white overflow-hidden py-2.5 relative z-50">
+  return html`<div className="bg-near-black text-white overflow-hidden py-2.5 relative">
     <div className="ticker-track select-none">
       <span className="text-[0.65rem] tracking-[0.28em] uppercase font-body font-medium text-white/65">${TICK_TEXT+TICK_TEXT}</span>
       <span className="text-[0.65rem] tracking-[0.28em] uppercase font-body font-medium text-white/65">${TICK_TEXT+TICK_TEXT}</span>
@@ -223,7 +239,7 @@ function Nav({go}){
         <div className="flex items-center gap-4">
           <button className="hidden md:block nav-link text-[0.78rem] font-medium tracking-[0.14em] uppercase text-black/60 hover:text-black">Account</button>
           <${CartBtn}/>
-          <button className="md:hidden -mr-1 p-1" onClick=${()=>setM(v=>!v)} aria-label="Toggle menu">
+          <button className="md:hidden -mr-2 w-11 h-11 flex items-center justify-center" onClick=${()=>setM(v=>!v)} aria-label="Toggle menu">
             ${m?html`<${XI}/>`:html`<${Bars}/>`}
           </button>
         </div>
@@ -242,7 +258,9 @@ function Hero({go}){
   const[loaded,setLoaded]=useState(false);
   return html`<section className="hero-section w-full">
     <img
-      src=${u('photo-1529139574466-a303027c1d8b',1600)}
+      src=${u('photo-1529139574466-a303027c1d8b',1200)}
+      srcSet=${`${u('photo-1529139574466-a303027c1d8b',640)} 640w, ${u('photo-1529139574466-a303027c1d8b',1200)} 1200w, ${u('photo-1529139574466-a303027c1d8b',1920)} 1920w`}
+      sizes="100vw"
       alt="AMARA editorial — built for her"
       className=${`hero-img img-fade${loaded?' loaded':''}`}
       onLoad=${()=>setLoaded(true)}
@@ -496,7 +514,7 @@ function SizeModal({close}){
     <div className="relative bg-white w-full sm:max-w-md max-h-[90vh] overflow-y-auto rounded-t-2xl sm:rounded-none">
       <div className="flex justify-between items-center px-6 py-5 border-b border-black/[0.07]">
         <h3 className="font-display font-black text-xl uppercase tracking-[0.12em]">Size Guide</h3>
-        <button onClick=${close} className="text-black/40 hover:text-black"><${XI}/></button>
+        <button onClick=${close} aria-label="Close size guide" className="text-black/40 hover:text-black p-2 -mr-2 w-11 h-11 flex items-center justify-center"><${XI}/></button>
       </div>
       <div className="px-6 py-5">
         <table className="w-full text-sm font-body">
@@ -548,10 +566,10 @@ function Gallery({p}){
       onTouchEnd=${e=>{if(tx.current===null)return;const d=tx.current-e.changedTouches[0].clientX;if(Math.abs(d)>44)d>0?next():prev();tx.current=null;}}>
       <img key=${idx} src=${p.imgs[idx]} alt=${`${p.name} — photo ${idx+1}`} className="absolute inset-0 w-full h-full object-cover img-fade loaded" fetchpriority="high" onLoad=${e=>e.target.classList.add('loaded')} onError=${e=>{e.target.style.display='none';}}/>
       ${total>1&&html`<${Fragment}>
-        <button onClick=${prev} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 bg-white/82 hover:bg-white flex items-center justify-center shadow-sm"><${ArrowL} s=${14}/></button>
-        <button onClick=${next} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 bg-white/82 hover:bg-white flex items-center justify-center shadow-sm rotate-180"><${ArrowL} s=${14}/></button>
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-20">
-          ${p.imgs.map((_,n)=>html`<button key=${n} onClick=${()=>setIdx(n)} className=${`rounded-full transition-all duration-300${n===idx?' bg-white w-5 h-1.5':' bg-white/40 w-1.5 h-1.5'}`}/>`)}
+        <button onClick=${prev} aria-label="Previous image" className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/88 hover:bg-white flex items-center justify-center shadow-sm"><${ArrowL} s=${14}/></button>
+        <button onClick=${next} aria-label="Next image" className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/88 hover:bg-white flex items-center justify-center shadow-sm rotate-180"><${ArrowL} s=${14}/></button>
+        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-0 z-20">
+          ${p.imgs.map((_,n)=>html`<button key=${n} onClick=${()=>setIdx(n)} aria-label=${`View photo ${n+1}`} className="p-2.5 flex items-center justify-center"><span className=${`rounded-full block transition-all duration-300${n===idx?' bg-white w-5 h-1.5':' bg-white/40 w-1.5 h-1.5'}`}/></button>`)}
         </div>
       </${Fragment}>`}
     </div>
@@ -577,7 +595,7 @@ function PDP({p,back,go}){
     ${sg&&html`<${SizeModal} close=${()=>setSg(false)}/>`}
     <div className="sticky top-14 z-30 bg-white/95 backdrop-blur-sm border-b border-black/[0.07]">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 h-11 flex items-center justify-between">
-        <button onClick=${back} className="flex items-center gap-2 text-sm font-body text-black/38 hover:text-black transition-colors"><${ArrowL} s=${15}/>Back</button>
+        <button onClick=${back} className="flex items-center gap-2 text-sm font-body text-black/38 hover:text-black transition-colors min-h-[44px]"><${ArrowL} s=${15}/>Back</button>
         <${CartBtn}/>
       </div>
     </div>
@@ -593,14 +611,14 @@ function PDP({p,back,go}){
           <div className="mb-6">
             <p className="text-[0.62rem] tracking-[0.22em] uppercase text-black/36 mb-3 font-body">Colour — <span className="text-near-black font-medium">${color.name}</span></p>
             <div className="flex gap-3">
-              ${p.colors.map(c=>html`<button key=${c.name} onClick=${()=>setColor(c)} className=${`color-swatch${color.name===c.name?' is-selected':''}`} style=${{backgroundColor:c.hex}} title=${c.name}/>`)}
+              ${p.colors.map(c=>html`<button key=${c.name} onClick=${()=>setColor(c)} aria-label=${`Select colour: ${c.name}`} className=${`color-swatch${color.name===c.name?' is-selected':''}`} style=${{backgroundColor:c.hex}}/>`)}
             </div>
           </div>
 
           <div className="mb-5">
             <div className="flex justify-between items-center mb-3">
               <p className="text-[0.62rem] tracking-[0.22em] uppercase text-black/36 font-body">Size</p>
-              <button onClick=${()=>setSg(true)} className="text-[0.62rem] underline underline-offset-2 text-black/36 hover:text-near-black font-body transition-colors">Size guide</button>
+              <button onClick=${()=>setSg(true)} className="text-[0.62rem] underline underline-offset-2 text-black/36 hover:text-near-black font-body transition-colors py-2 px-1 -mx-1 min-h-[44px]">Size guide</button>
             </div>
             <div className="flex flex-wrap gap-2">
               ${p.sizes.map(s=>{const o=st(s)===0;return html`<button key=${s} onClick=${()=>{if(!o){setSize(s);setErr('');}}} disabled=${o} className=${`size-pill${size===s?' is-selected':''}${o?' is-out':''}`}>${s}</button>`;})}
@@ -628,7 +646,7 @@ function PDP({p,back,go}){
         </div>
       </div>
     </main>
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-black/[0.07] px-4 py-3 mobile-atb-bar">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-black/[0.07] px-4 pt-3 mobile-atb-bar safe-pb">
       <button onClick=${doAdd} className="transition-btn w-full bg-near-black text-white py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase hover:bg-accent">Add to bag</button>
     </div>
   </${Fragment}>`;
@@ -645,7 +663,7 @@ function CartDrawer({go}){
         <h2 className="font-display font-black uppercase text-xl tracking-[0.12em]">
           Your bag${count>0&&html`<span className="font-body font-normal text-sm text-black/28 ml-1.5">(${count})</span>`}
         </h2>
-        <button onClick=${()=>setOpen(false)} className="text-black/32 hover:text-near-black transition-colors"><${XI}/></button>
+        <button onClick=${()=>setOpen(false)} aria-label="Close cart" className="text-black/32 hover:text-near-black transition-colors p-2 -mr-2"><${XI}/></button>
       </div>
       <div className="flex-1 overflow-y-auto drawer-scroll">
         ${items.length===0
@@ -680,7 +698,7 @@ function CartDrawer({go}){
           </ul>`
         }
       </div>
-      ${items.length>0&&html`<div className="flex-shrink-0 border-t border-black/[0.07] px-5 py-5">
+      ${items.length>0&&html`<div className="flex-shrink-0 border-t border-black/[0.07] px-5 pt-5 safe-pb-lg">
         <div className="flex justify-between text-sm font-body mb-1"><span className="text-black/38">Subtotal</span><span className="font-semibold">$${sub.toFixed(2)} CAD</span></div>
         <p className="text-[0.62rem] text-black/20 font-body mb-4">Shipping & taxes calculated at checkout</p>
         <button className="transition-btn w-full bg-near-black text-white py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase hover:bg-accent">Checkout — $${sub.toFixed(2)}</button>
