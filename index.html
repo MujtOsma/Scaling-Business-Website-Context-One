@@ -653,7 +653,7 @@ function PDP({p,back,go}){
             </div>
           </div>
 
-          ${scMsg()&&html`<p className="text-[0.78rem] font-semibold text-accent mb-4 font-body">${scMsg()}</p>`}
+          ${(()=>{const m=scMsg();return m&&html`<p className="text-[0.78rem] font-semibold text-accent mb-4 font-body">${m}</p>`;})()}
           ${err&&html`<p className="text-[0.78rem] text-red-500 mb-3 font-body">${err}</p>`}
 
           <button onClick=${doAdd} className="hidden md:block transition-btn w-full bg-near-black text-white py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase mb-8 hover:bg-accent">Add to bag</button>
@@ -757,15 +757,16 @@ function Checkout({go,onOrder}){
   const fmtCvv=v=>v.replace(/\D/g,'').slice(0,4);
   const fmtPostal=v=>v.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
 
-  const step1Valid=form.firstName&&form.lastName&&form.email&&form.address&&form.city&&form.postal.length>=5;
+  const step1Valid=form.firstName&&form.lastName&&form.email&&form.address&&form.city&&form.postal.length===6;
   const step2Valid=form.cardName&&form.cardNum.replace(/\s/g,'').length===16&&form.expiry.length===5&&form.cvv.length>=3;
 
   const placeOrder=()=>{
     setLoading(true);
+    const snapshot=[...items];
     setTimeout(()=>{
       const orderNum='AMARA-'+Math.floor(100000+Math.random()*900000);
       clearCart();
-      onOrder({orderNum,name:form.firstName,email:form.email,items:[...items],total});
+      onOrder({orderNum,name:form.firstName,email:form.email,items:snapshot,total});
       go('order-confirmed');
     },1400);
   };
@@ -943,7 +944,12 @@ function Checkout({go,onOrder}){
 
 // ── Order Confirmed ───────────────────────────────────────────────────
 function OrderConfirmed({order,go}){
-  if(!order)return null;
+  if(!order)return html`<div className="min-h-screen flex items-center justify-center px-4 text-center">
+    <div>
+      <p className="font-display font-black uppercase text-xl tracking-[0.1em] mb-3">No order found</p>
+      <button onClick=${()=>go('home')} className="transition-btn bg-near-black text-white px-8 py-3 text-[0.68rem] tracking-[0.22em] uppercase font-semibold hover:bg-accent">Go to store</button>
+    </div>
+  </div>`;
   return html`<main className="min-h-screen flex items-center justify-center px-4 py-20">
     <div className="max-w-md w-full text-center">
       <div className="w-16 h-16 rounded-full bg-near-black flex items-center justify-center mx-auto mb-6 text-white">
@@ -984,21 +990,25 @@ function OrderConfirmed({order,go}){
 const STORAGE_KEY='amara_user';
 function AccountPage({go}){
   const stored=()=>{try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');}catch{return null;}};
-  const[user,setUser]=useState(stored);
+  const storedSafe=()=>{const s=stored();if(!s)return null;const{pw:_,...safe}=s;return safe;};
+  const[user,setUser]=useState(storedSafe);
   const[mode,setMode]=useState(user?'profile':'login');
   const[form,setForm]=useState({name:'',email:'',password:''});
   const[err,setErr]=useState('');
   const[loading,setLoading]=useState(false);
   const set=(k,v)=>setForm(f=>({...f,[k]:v}));
 
+  const hashPw=pw=>btoa(encodeURIComponent(pw+'__amara_salt'));
+
   const doSignup=e=>{
     e.preventDefault();
     if(!form.name.trim()||!form.email.trim()||form.password.length<6){setErr('Please fill all fields. Password must be 6+ characters.');return;}
     setLoading(true);
     setTimeout(()=>{
-      const u={name:form.name.trim(),email:form.email.trim().toLowerCase(),verified:false,joined:new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'})};
+      const u={name:form.name.trim(),email:form.email.trim().toLowerCase(),pw:hashPw(form.password),verified:false,joined:new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'})};
       localStorage.setItem(STORAGE_KEY,JSON.stringify(u));
-      setUser(u);setMode('verify');setLoading(false);
+      const{pw:_,...safe}=u;
+      setUser(safe);setMode('verify');setLoading(false);
     },900);
   };
 
@@ -1007,17 +1017,21 @@ function AccountPage({go}){
     const s=stored();
     if(!s){setErr('No account found. Please sign up first.');return;}
     if(s.email!==form.email.trim().toLowerCase()){setErr('Email not found.');return;}
+    if(s.pw!==hashPw(form.password)){setErr('Incorrect password.');return;}
     setLoading(true);
-    setTimeout(()=>{setUser(s);setMode(s.verified?'profile':'verify');setLoading(false);},700);
+    const{pw:_,...safe}=s;
+    setTimeout(()=>{setUser(safe);setMode(safe.verified?'profile':'verify');setLoading(false);},700);
   };
 
   const simulateVerify=()=>{
-    const u={...user,verified:true};
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(u));
-    setUser(u);setMode('profile');
+    const stored_full=stored();
+    const updated={...stored_full,verified:true};
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(updated));
+    const{pw:_,...safe}=updated;
+    setUser(safe);setMode('profile');
   };
 
-  const logout=()=>{setUser(null);setMode('login');setForm({name:'',email:'',password:''});};
+  const logout=()=>{localStorage.removeItem(STORAGE_KEY);setUser(null);setMode('login');setForm({name:'',email:'',password:''});};
 
   return html`<main className="min-h-screen max-w-md mx-auto px-4 py-16 sm:py-20">
     <button onClick=${()=>go('home')} className="flex items-center gap-2 text-sm font-body text-black/38 hover:text-black transition-colors mb-10 min-h-[44px]"><${ArrowL} s=${15}/>Back to store</button>
