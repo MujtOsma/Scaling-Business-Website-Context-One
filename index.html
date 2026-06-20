@@ -90,6 +90,14 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#0A0A0A;overflow-x:hid
 .testi-card{border:1px solid rgba(10,10,10,.07);padding:2rem;transition:box-shadow .3s ease,transform .3s ease}
 .testi-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.07);transform:translateY(-2px)}
 
+.form-input{width:100%;border:1px solid rgba(10,10,10,.18);padding:.85rem 1rem;font-family:'Inter',sans-serif;font-size:.875rem;color:#0A0A0A;background:#fff;transition:border-color .2s ease;outline:none}
+.form-input:focus{border-color:#0A0A0A}
+.form-input::placeholder{color:rgba(10,10,10,.3)}
+.form-label{display:block;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:rgba(10,10,10,.45);margin-bottom:.45rem;font-family:'Inter',sans-serif}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230A0A0A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+
+.step-dot{width:2rem;height:2rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;font-family:'Inter',sans-serif;flex-shrink:0}
+
 @media(max-width:767px){.mobile-atb-bar{animation:slideUpBar .25s ease both}}
 @keyframes slideUpBar{from{transform:translateY(100%)}to{transform:translateY(0)}}
 
@@ -99,6 +107,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#0A0A0A;overflow-x:hid
 
 /* Focus styles — visible for keyboard + assistive tech */
 button:focus-visible,a:focus-visible{outline:2px solid #C4622D;outline-offset:3px;border-radius:2px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #C4622D;outline-offset:1px}
 
 /* Respect user motion preferences */
 @media(prefers-reduced-motion:reduce){
@@ -116,7 +125,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #C4622D;outline-offset:3p
 {"imports":{"react":"https://esm.sh/react@18","react-dom/client":"https://esm.sh/react-dom@18/client","htm":"https://esm.sh/htm@3"}}
 </script>
 <script type="module">
-import{createElement as h,createContext,useContext,useState,useEffect,useRef,Fragment}from'react';
+import{createElement as h,createContext,useContext,useState,useEffect,useRef,Fragment,useCallback}from'react';
 import{createRoot}from'react-dom/client';
 import htm from'htm';
 const html=htm.bind(h);
@@ -125,6 +134,7 @@ const BRAND='AMARA';
 const UB='https://images.unsplash.com/';
 const UQ='?auto=format&fit=crop&q=80';
 const u=(id,w)=>`${UB}${id}${UQ}&w=${w||800}`;
+const PROVINCES=['AB','BC','MB','NB','NL','NT','NS','NU','ON','PE','QC','SK','YT'];
 
 const PRODUCTS=[
   {id:1,name:'Roots Coord Set',drop:'The Roots Capsule',price:89,disp:'$89 CAD',
@@ -189,7 +199,8 @@ function CartProvider({children}){
   }
   function rm(k){setItems(p=>p.filter(i=>i.k!==k));}
   function qty(k,d){setItems(p=>p.map(i=>i.k===k?{...i,qty:i.qty+d}:i).filter(i=>i.qty>0));}
-  return html`<${CartCtx.Provider} value=${{items,count,sub,open,setOpen,add,rm,qty}}>${children}</${CartCtx.Provider}>`;
+  function clearCart(){setItems([]);}
+  return html`<${CartCtx.Provider} value=${{items,count,sub,open,setOpen,add,rm,qty,clearCart}}>${children}</${CartCtx.Provider}>`;
 }
 const useCart=()=>useContext(CartCtx);
 
@@ -203,6 +214,9 @@ const Trash=({s=15})=>html`<svg width=${s} height=${s} viewBox="0 0 24 24" fill=
 const Star=()=>html`<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" className="text-accent"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
 const IG=({s=18})=>html`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>`;
 const TT=({s=18})=>html`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34v-7a8.16 8.16 0 004.77 1.52V6.37a4.85 4.85 0 01-1-.32z"/></svg>`;
+const Check=({s=20})=>html`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const Mail=({s=20})=>html`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`;
+const User=({s=20})=>html`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
 
 // ── Cart Button ───────────────────────────────────────────────────────
 function CartBtn({cls=''}){
@@ -229,15 +243,23 @@ const LINKS=['Shop','Lookbook','Story','Drops'];
 function Nav({go}){
   const[m,setM]=useState(false);
   const close=()=>setM(false);
+  const navGo=(label)=>{
+    close();
+    if(label==='Account')go('account');
+    else if(label==='Newsletter')go('newsletter');
+    else go('home');
+  };
   return html`<${Fragment}>
     <nav className="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-black/[0.06]">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         <button onClick=${()=>{go('home');close();}} className="font-display font-black text-[1.65rem] tracking-[0.22em] uppercase leading-none">${BRAND}</button>
         <div className="hidden md:flex items-center gap-7">
-          ${LINKS.map(l=>html`<button key=${l} className="nav-link text-[0.78rem] font-medium tracking-[0.14em] uppercase text-black/60 hover:text-black">${l}</button>`)}
+          ${LINKS.map(l=>html`<button key=${l} onClick=${()=>navGo(l)} className="nav-link text-[0.78rem] font-medium tracking-[0.14em] uppercase text-black/60 hover:text-black">${l}</button>`)}
         </div>
         <div className="flex items-center gap-4">
-          <button className="hidden md:block nav-link text-[0.78rem] font-medium tracking-[0.14em] uppercase text-black/60 hover:text-black">Account</button>
+          <button onClick=${()=>go('account')} className="hidden md:flex items-center gap-1.5 nav-link text-[0.78rem] font-medium tracking-[0.14em] uppercase text-black/60 hover:text-black min-h-[44px]">
+            <${User} s=${16}/>Account
+          </button>
           <${CartBtn}/>
           <button className="md:hidden -mr-2 w-11 h-11 flex items-center justify-center" onClick=${()=>setM(v=>!v)} aria-label="Toggle menu">
             ${m?html`<${XI}/>`:html`<${Bars}/>`}
@@ -247,7 +269,7 @@ function Nav({go}){
     </nav>
     <div className=${`mobile-menu${m?' is-open':''} fixed top-14 left-0 right-0 z-30 bg-white border-b border-black/[0.07] md:hidden`}>
       <div className="px-5 pt-5 pb-6 flex flex-col gap-1">
-        ${[...LINKS,'Account'].map(l=>html`<button key=${l} onClick=${close} className="text-left font-display font-black text-2xl tracking-[0.18em] uppercase py-2.5 border-b border-black/[0.05] last:border-0">${l}</button>`)}
+        ${[...LINKS,'Account','Newsletter'].map(l=>html`<button key=${l} onClick=${()=>navGo(l)} className="text-left font-display font-black text-2xl tracking-[0.18em] uppercase py-2.5 border-b border-black/[0.05] last:border-0">${l}</button>`)}
       </div>
     </div>
   </${Fragment}>`;
@@ -427,7 +449,7 @@ function Testimonials(){
 }
 
 // ── Email ─────────────────────────────────────────────────────────────
-function Email(){
+function Email({go}){
   const[v,setV]=useState('');
   const[done,setDone]=useState(false);
   return html`<section className="bg-near-black text-white py-24 sm:py-32 px-4 sm:px-6">
@@ -436,12 +458,16 @@ function Email(){
       <h2 className="font-display font-black uppercase leading-[.92] text-[3rem] sm:text-[3.8rem] tracking-[0.04em] mb-3">Join the<br/>${BRAND} list</h2>
       <p className="text-white/32 text-sm font-body mb-10 leading-relaxed">Drop alerts. Restock notifications. First access.<br/>No noise, ever.</p>
       ${done
-        ?html`<p className="font-display font-black text-3xl uppercase tracking-[0.15em] text-accent">You're in.</p>`
+        ?html`<div>
+          <p className="font-display font-black text-3xl uppercase tracking-[0.15em] text-accent mb-2">You're in.</p>
+          <p className="text-white/38 text-sm font-body">Check your inbox — we'll be in touch soon.</p>
+        </div>`
         :html`<form onSubmit=${e=>{e.preventDefault();if(v.trim())setDone(true);}} className="flex flex-col sm:flex-row gap-3">
           <input type="email" value=${v} onChange=${e=>setV(e.target.value)} placeholder="your@email.com" required className="flex-1 bg-transparent border border-white/18 px-4 py-3.5 text-white placeholder-white/22 text-sm font-body focus:outline-none focus:border-white/50 transition-colors"/>
           <button type="submit" className="transition-btn bg-white text-near-black px-8 py-3.5 text-[0.7rem] font-semibold tracking-[0.22em] uppercase hover:bg-accent hover:text-white flex-shrink-0">Join</button>
         </form>`
       }
+      <button onClick=${()=>go('newsletter')} className="mt-6 text-white/28 text-[0.68rem] tracking-[0.14em] uppercase font-body underline underline-offset-4 hover:text-white/60 transition-colors">See what you get →</button>
     </div>
   </section>`;
 }
@@ -462,13 +488,15 @@ function Footer({go}){
         <div>
           <p className="text-[0.58rem] tracking-[0.28em] uppercase text-white/20 mb-5 font-body">Shop</p>
           <ul className="space-y-3 text-sm text-white/42 font-body">
-            ${['The Roots Capsule','Coord Sets','Gym Sets','Jackets','Bottoms','Accessories'].map(l=>html`<li key=${l}><button className="hover:text-white transition-colors text-left">${l}</button></li>`)}
+            ${['The Roots Capsule','Coord Sets','Gym Sets','Jackets','Bottoms','Accessories'].map(l=>html`<li key=${l}><button onClick=${()=>go('home')} className="hover:text-white transition-colors text-left">${l}</button></li>`)}
           </ul>
         </div>
         <div>
           <p className="text-[0.58rem] tracking-[0.28em] uppercase text-white/20 mb-5 font-body">Info</p>
           <ul className="space-y-3 text-sm text-white/42 font-body">
-            ${['Our Story','Size Guide','Shipping','Returns','FAQ','Contact'].map(l=>html`<li key=${l}><button className="hover:text-white transition-colors text-left">${l}</button></li>`)}
+            <li><button onClick=${()=>go('account')} className="hover:text-white transition-colors text-left">My Account</button></li>
+            <li><button onClick=${()=>go('newsletter')} className="hover:text-white transition-colors text-left">Newsletter</button></li>
+            ${['Size Guide','Shipping','Returns','FAQ','Contact'].map(l=>html`<li key=${l}><button className="hover:text-white transition-colors text-left">${l}</button></li>`)}
           </ul>
         </div>
         <div>
@@ -501,7 +529,7 @@ function Home({go}){
     <${Story}/>
     <${Lookbook}/>
     <${Testimonials}/>
-    <${Email}/>
+    <${Email} go=${go}/>
     <${Footer} go=${go}/>
   </main>`;
 }
@@ -656,9 +684,10 @@ function PDP({p,back,go}){
 function CartDrawer({go}){
   const{items,open,setOpen,sub,count,rm,qty}=useCart();
   useEffect(()=>{document.body.style.overflow=open?'hidden':'';return()=>{document.body.style.overflow='';};},[open]);
+  const goCheckout=()=>{setOpen(false);go('checkout');};
   return html`<${Fragment}>
     <div className="fixed inset-0 z-[45] bg-black/40 transition-opacity duration-[380ms]" style=${{opacity:open?1:0,pointerEvents:open?'all':'none'}} onClick=${()=>setOpen(false)}/>
-    <div className=${`cart-drawer${open?' is-open':''} fixed top-0 right-0 h-full w-full sm:w-[400px] z-[50] bg-white flex flex-col`} role="dialog" aria-modal="true">
+    <div className=${`cart-drawer${open?' is-open':''} fixed top-0 right-0 h-full w-full sm:w-[400px] z-[50] bg-white flex flex-col`} role="dialog" aria-modal="true" aria-label="Shopping bag">
       <div className="flex items-center justify-between px-5 py-5 border-b border-black/[0.07] flex-shrink-0">
         <h2 className="font-display font-black uppercase text-xl tracking-[0.12em]">
           Your bag${count>0&&html`<span className="font-body font-normal text-sm text-black/28 ml-1.5">(${count})</span>`}
@@ -684,13 +713,13 @@ function CartDrawer({go}){
                 </div>
                 <div className="flex items-center justify-between mt-3">
                   <div className="flex items-center border border-black/12">
-                    <button className="qty-btn" onClick=${()=>qty(it.k,-1)}>−</button>
+                    <button className="qty-btn" onClick=${()=>qty(it.k,-1)} aria-label="Decrease quantity">−</button>
                     <span className="w-7 text-center text-sm font-body">${it.qty}</span>
-                    <button className="qty-btn" onClick=${()=>qty(it.k,1)}>+</button>
+                    <button className="qty-btn" onClick=${()=>qty(it.k,1)} aria-label="Increase quantity">+</button>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-body font-medium">$${(it.price*it.qty).toFixed(2)}</span>
-                    <button onClick=${()=>rm(it.k)} className="text-black/22 hover:text-near-black transition-colors"><${Trash}/></button>
+                    <button onClick=${()=>rm(it.k)} aria-label="Remove item" className="text-black/22 hover:text-near-black transition-colors"><${Trash}/></button>
                   </div>
                 </div>
               </div>
@@ -701,22 +730,459 @@ function CartDrawer({go}){
       ${items.length>0&&html`<div className="flex-shrink-0 border-t border-black/[0.07] px-5 pt-5 safe-pb-lg">
         <div className="flex justify-between text-sm font-body mb-1"><span className="text-black/38">Subtotal</span><span className="font-semibold">$${sub.toFixed(2)} CAD</span></div>
         <p className="text-[0.62rem] text-black/20 font-body mb-4">Shipping & taxes calculated at checkout</p>
-        <button className="transition-btn w-full bg-near-black text-white py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase hover:bg-accent">Checkout — $${sub.toFixed(2)}</button>
+        <button onClick=${goCheckout} className="transition-btn w-full bg-near-black text-white py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase hover:bg-accent">Checkout — $${sub.toFixed(2)}</button>
       </div>`}
     </div>
   </${Fragment}>`;
+}
+
+// ── Checkout ──────────────────────────────────────────────────────────
+function Checkout({go,onOrder}){
+  const{items,sub,clearCart}=useCart();
+  const[step,setStep]=useState(1);
+  const[loading,setLoading]=useState(false);
+  const ship=sub>=100?0:9.99;
+  const tax=((sub+ship)*0.13);
+  const total=sub+ship+tax;
+
+  const[form,setForm]=useState({
+    firstName:'',lastName:'',email:'',phone:'',
+    address:'',city:'',province:'ON',postal:'',
+    cardName:'',cardNum:'',expiry:'',cvv:''
+  });
+  const set=(k,v)=>setForm(f=>({...f,[k]:v}));
+
+  const fmtCard=v=>v.replace(/\D/g,'').slice(0,16).replace(/(.{4})(?=.)/g,'$1 ').trim();
+  const fmtExp=v=>{const d=v.replace(/\D/g,'').slice(0,4);return d.length>2?d.slice(0,2)+'/'+d.slice(2):d;};
+  const fmtCvv=v=>v.replace(/\D/g,'').slice(0,4);
+  const fmtPostal=v=>v.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+
+  const step1Valid=form.firstName&&form.lastName&&form.email&&form.address&&form.city&&form.postal.length>=5;
+  const step2Valid=form.cardName&&form.cardNum.replace(/\s/g,'').length===16&&form.expiry.length===5&&form.cvv.length>=3;
+
+  const placeOrder=()=>{
+    setLoading(true);
+    setTimeout(()=>{
+      const orderNum='AMARA-'+Math.floor(100000+Math.random()*900000);
+      clearCart();
+      onOrder({orderNum,name:form.firstName,email:form.email,items:[...items],total});
+      go('order-confirmed');
+    },1400);
+  };
+
+  if(items.length===0&&step!==3)return html`<div className="min-h-screen flex items-center justify-center px-4">
+    <div className="text-center">
+      <p className="font-display font-black uppercase text-2xl tracking-[0.12em] mb-3">Your bag is empty</p>
+      <button onClick=${()=>go('home')} className="transition-btn bg-near-black text-white px-8 py-3 text-[0.68rem] tracking-[0.22em] uppercase font-semibold hover:bg-accent">Shop the drop</button>
+    </div>
+  </div>`;
+
+  const steps=[{n:1,label:'Shipping'},{n:2,label:'Payment'},{n:3,label:'Review'}];
+
+  return html`<main className="max-w-screen-lg mx-auto px-4 sm:px-6 py-10 pb-20">
+    <button onClick=${()=>go('home')} className="flex items-center gap-2 text-sm font-body text-black/38 hover:text-black transition-colors mb-8 min-h-[44px]"><${ArrowL} s=${15}/>Continue shopping</button>
+    <h1 className="font-display font-black uppercase text-[2.4rem] sm:text-[3rem] tracking-[0.04em] leading-none mb-8">Checkout</h1>
+
+    <!-- Step indicator -->
+    <div className="flex items-center gap-0 mb-10">
+      ${steps.map((s,i)=>html`<${Fragment} key=${s.n}>
+        <div className="flex items-center gap-2">
+          <div className=${`step-dot ${step>=s.n?'bg-near-black text-white':'bg-black/8 text-black/30'}`}>${step>s.n?html`<${Check} s=${12}/>`:s.n}</div>
+          <span className=${`text-[0.68rem] tracking-[0.14em] uppercase font-body ${step>=s.n?'text-near-black font-semibold':'text-black/28'}`}>${s.label}</span>
+        </div>
+        ${i<steps.length-1&&html`<div className="flex-1 h-px bg-black/10 mx-3"/>`}
+      </${Fragment}>`)}
+    </div>
+
+    <div className="grid lg:grid-cols-[1fr_380px] gap-10">
+      <!-- Form area -->
+      <div>
+        ${step===1&&html`<div className="space-y-5">
+          <h2 className="font-display font-black uppercase text-[1.4rem] tracking-[0.1em] mb-5">Contact & Shipping</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="form-label">First name</label>
+              <input className="form-input" value=${form.firstName} onInput=${e=>set('firstName',e.target.value)} placeholder="Maya" autocomplete="given-name"/>
+            </div>
+            <div>
+              <label className="form-label">Last name</label>
+              <input className="form-input" value=${form.lastName} onInput=${e=>set('lastName',e.target.value)} placeholder="Johnson" autocomplete="family-name"/>
+            </div>
+          </div>
+          <div>
+            <label className="form-label">Email</label>
+            <input className="form-input" type="email" value=${form.email} onInput=${e=>set('email',e.target.value)} placeholder="you@example.com" autocomplete="email"/>
+          </div>
+          <div>
+            <label className="form-label">Phone (optional)</label>
+            <input className="form-input" type="tel" value=${form.phone} onInput=${e=>set('phone',e.target.value)} placeholder="+1 (416) 555-0100" autocomplete="tel"/>
+          </div>
+          <div>
+            <label className="form-label">Street address</label>
+            <input className="form-input" value=${form.address} onInput=${e=>set('address',e.target.value)} placeholder="123 Queen St W, Apt 4" autocomplete="street-address"/>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="form-label">City</label>
+              <input className="form-input" value=${form.city} onInput=${e=>set('city',e.target.value)} placeholder="Toronto" autocomplete="address-level2"/>
+            </div>
+            <div>
+              <label className="form-label">Province</label>
+              <select className="form-input form-select" value=${form.province} onChange=${e=>set('province',e.target.value)} autocomplete="address-level1">
+                ${PROVINCES.map(p=>html`<option key=${p} value=${p}>${p}</option>`)}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="form-label">Postal code</label>
+            <input className="form-input" value=${form.postal} onInput=${e=>set('postal',fmtPostal(e.target.value))} placeholder="M5V 2T6" autocomplete="postal-code" style=${{maxWidth:'180px'}}/>
+          </div>
+          <button onClick=${()=>step1Valid&&setStep(2)} disabled=${!step1Valid} className=${`transition-btn w-full py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase mt-4 ${step1Valid?'bg-near-black text-white hover:bg-accent':'bg-black/8 text-black/28 cursor-not-allowed'}`}>
+            Continue to payment
+          </button>
+        </div>`}
+
+        ${step===2&&html`<div className="space-y-5">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-display font-black uppercase text-[1.4rem] tracking-[0.1em]">Payment</h2>
+            <button onClick=${()=>setStep(1)} className="text-[0.68rem] text-black/38 hover:text-black underline underline-offset-2 font-body">Edit shipping</button>
+          </div>
+          <div className="bg-[#F8F4EE] px-4 py-3 flex items-center gap-3">
+            <div className="w-4 h-4 rounded-full border-2 border-near-black flex items-center justify-center flex-shrink-0">
+              <div className="w-2 h-2 rounded-full bg-near-black"/>
+            </div>
+            <span className="text-sm font-body">Credit / Debit card</span>
+            <div className="ml-auto flex gap-2">
+              ${['VISA','MC','AMEX'].map(b=>html`<span key=${b} className="text-[0.6rem] font-bold tracking-wider border border-black/12 px-1.5 py-0.5 text-black/40">${b}</span>`)}
+            </div>
+          </div>
+          <div>
+            <label className="form-label">Cardholder name</label>
+            <input className="form-input" value=${form.cardName} onInput=${e=>set('cardName',e.target.value)} placeholder="Maya Johnson" autocomplete="cc-name"/>
+          </div>
+          <div>
+            <label className="form-label">Card number</label>
+            <input className="form-input" value=${form.cardNum} onInput=${e=>set('cardNum',fmtCard(e.target.value))} placeholder="1234 5678 9012 3456" autocomplete="cc-number" inputmode="numeric"/>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="form-label">Expiry (MM/YY)</label>
+              <input className="form-input" value=${form.expiry} onInput=${e=>set('expiry',fmtExp(e.target.value))} placeholder="08/27" autocomplete="cc-exp" inputmode="numeric"/>
+            </div>
+            <div>
+              <label className="form-label">CVV</label>
+              <input className="form-input" value=${form.cvv} onInput=${e=>set('cvv',fmtCvv(e.target.value))} placeholder="•••" autocomplete="cc-csc" inputmode="numeric" type="password"/>
+            </div>
+          </div>
+          <p className="text-[0.65rem] text-black/28 font-body flex items-center gap-1.5">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            Your payment is encrypted and secure. This is a demo — no real charge occurs.
+          </p>
+          <button onClick=${()=>step2Valid&&setStep(3)} disabled=${!step2Valid} className=${`transition-btn w-full py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase mt-2 ${step2Valid?'bg-near-black text-white hover:bg-accent':'bg-black/8 text-black/28 cursor-not-allowed'}`}>
+            Review order
+          </button>
+        </div>`}
+
+        ${step===3&&html`<div>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-display font-black uppercase text-[1.4rem] tracking-[0.1em]">Review your order</h2>
+            <button onClick=${()=>setStep(2)} className="text-[0.68rem] text-black/38 hover:text-black underline underline-offset-2 font-body">Edit</button>
+          </div>
+          <div className="border border-black/8 divide-y divide-black/[0.05] mb-6">
+            <div className="px-4 py-3 grid grid-cols-2 text-sm font-body gap-y-1">
+              <span className="text-black/38">Ship to</span>
+              <span className="text-right">${form.firstName} ${form.lastName}</span>
+              <span className="text-black/38">Address</span>
+              <span className="text-right text-[0.82rem]">${form.address}, ${form.city} ${form.province} ${form.postal}</span>
+              <span className="text-black/38">Contact</span>
+              <span className="text-right text-[0.82rem]">${form.email}</span>
+            </div>
+            <div className="px-4 py-3 grid grid-cols-2 text-sm font-body gap-y-1">
+              <span className="text-black/38">Payment</span>
+              <span className="text-right">•••• •••• •••• ${form.cardNum.slice(-4)}</span>
+            </div>
+          </div>
+          <button onClick=${placeOrder} disabled=${loading} className=${`transition-btn w-full py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase ${loading?'bg-black/60':'bg-near-black hover:bg-accent'} text-white`}>
+            ${loading?'Processing…':`Place order — $${total.toFixed(2)} CAD`}
+          </button>
+          <p className="text-center text-[0.65rem] text-black/22 font-body mt-3">Demo only — no real payment is processed</p>
+        </div>`}
+      </div>
+
+      <!-- Order summary -->
+      <aside>
+        <div className="border border-black/8 p-5 sticky top-20">
+          <h3 className="font-display font-black uppercase tracking-[0.1em] text-sm mb-4">Order summary</h3>
+          <ul className="divide-y divide-black/[0.05] mb-4">
+            ${items.map(it=>html`<li key=${it.k} className="flex gap-3 py-3">
+              <div className="w-14 h-[70px] flex-shrink-0 overflow-hidden relative" style=${{backgroundColor:it.shade||'#E0D8CC'}}>
+                <img src=${it.th} alt=${it.name} className="w-full h-full object-cover img-fade" loading="lazy" onLoad=${e=>e.target.classList.add('loaded')} onError=${e=>{e.target.style.display='none';}}/>
+                <span className="absolute -top-1 -right-1 bg-near-black text-white text-[0.6rem] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold" style=${{width:'1.1rem',height:'1.1rem',fontSize:'.58rem'}}>${it.qty}</span>
+              </div>
+              <div className="flex-1">
+                <p className="font-display font-bold uppercase text-[0.78rem] tracking-[0.06em] leading-snug">${it.name}</p>
+                <p className="text-[0.62rem] text-black/36 font-body mt-0.5">${it.color.name} / ${it.size}</p>
+              </div>
+              <span className="text-sm font-body font-medium ml-2">$${(it.price*it.qty).toFixed(2)}</span>
+            </li>`)}
+          </ul>
+          <div className="border-t border-black/[0.07] pt-4 space-y-2 text-sm font-body">
+            <div className="flex justify-between"><span className="text-black/45">Subtotal</span><span>$${sub.toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-black/45">Shipping</span><span>${ship===0?'Free':`$${ship.toFixed(2)}`}</span></div>
+            <div className="flex justify-between"><span className="text-black/45">HST (13%)</span><span>$${tax.toFixed(2)}</span></div>
+            <div className="flex justify-between font-semibold text-base border-t border-black/[0.07] pt-3 mt-1">
+              <span>Total</span><span>$${total.toFixed(2)} CAD</span>
+            </div>
+          </div>
+          ${sub<100&&html`<p className="mt-3 text-[0.65rem] text-accent font-body">Add $${(100-sub).toFixed(2)} more for free shipping</p>`}
+        </div>
+      </aside>
+    </div>
+  </main>`;
+}
+
+// ── Order Confirmed ───────────────────────────────────────────────────
+function OrderConfirmed({order,go}){
+  if(!order)return null;
+  return html`<main className="min-h-screen flex items-center justify-center px-4 py-20">
+    <div className="max-w-md w-full text-center">
+      <div className="w-16 h-16 rounded-full bg-near-black flex items-center justify-center mx-auto mb-6 text-white">
+        <${Check} s=${28}/>
+      </div>
+      <p className="text-[0.6rem] tracking-[0.32em] uppercase text-black/28 mb-2 font-body">Order confirmed</p>
+      <h1 className="font-display font-black uppercase text-[2.4rem] sm:text-[3rem] tracking-[0.04em] leading-none mb-2">Thank you,<br/>${order.name}!</h1>
+      <p className="text-sm text-black/42 font-body mb-8">A confirmation has been sent to <span className="font-semibold text-near-black">${order.email}</span></p>
+
+      <div className="border border-black/8 p-5 text-left mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-[0.6rem] tracking-[0.28em] uppercase text-black/28 font-body">Order number</span>
+          <span className="font-display font-bold text-sm tracking-wider">${order.orderNum}</span>
+        </div>
+        <ul className="divide-y divide-black/[0.05]">
+          ${order.items.map(it=>html`<li key=${it.k} className="flex justify-between py-2.5 text-sm font-body">
+            <span className="text-black/60">${it.name} <span className="text-black/36 text-[0.72rem]">${it.color.name} / ${it.size} × ${it.qty}</span></span>
+            <span className="font-medium">$${(it.price*it.qty).toFixed(2)}</span>
+          </li>`)}
+        </ul>
+        <div className="border-t border-black/[0.07] pt-3 mt-3 flex justify-between font-semibold text-sm font-body">
+          <span>Total</span><span>$${order.total.toFixed(2)} CAD</span>
+        </div>
+      </div>
+
+      <div className="bg-[#F8F4EE] p-4 text-sm font-body text-black/55 mb-8 text-left">
+        <p className="font-semibold text-near-black mb-1">Estimated delivery</p>
+        <p>3–7 business days · Canada-wide shipping</p>
+        <p className="text-[0.72rem] text-black/32 mt-1">You'll receive a tracking link once your order ships.</p>
+      </div>
+
+      <button onClick=${()=>go('home')} className="transition-btn w-full bg-near-black text-white py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase hover:bg-accent">Continue shopping</button>
+    </div>
+  </main>`;
+}
+
+// ── Account Page ──────────────────────────────────────────────────────
+const STORAGE_KEY='amara_user';
+function AccountPage({go}){
+  const stored=()=>{try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');}catch{return null;}};
+  const[user,setUser]=useState(stored);
+  const[mode,setMode]=useState(user?'profile':'login');
+  const[form,setForm]=useState({name:'',email:'',password:''});
+  const[err,setErr]=useState('');
+  const[loading,setLoading]=useState(false);
+  const set=(k,v)=>setForm(f=>({...f,[k]:v}));
+
+  const doSignup=e=>{
+    e.preventDefault();
+    if(!form.name.trim()||!form.email.trim()||form.password.length<6){setErr('Please fill all fields. Password must be 6+ characters.');return;}
+    setLoading(true);
+    setTimeout(()=>{
+      const u={name:form.name.trim(),email:form.email.trim().toLowerCase(),verified:false,joined:new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'})};
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(u));
+      setUser(u);setMode('verify');setLoading(false);
+    },900);
+  };
+
+  const doLogin=e=>{
+    e.preventDefault();
+    const s=stored();
+    if(!s){setErr('No account found. Please sign up first.');return;}
+    if(s.email!==form.email.trim().toLowerCase()){setErr('Email not found.');return;}
+    setLoading(true);
+    setTimeout(()=>{setUser(s);setMode(s.verified?'profile':'verify');setLoading(false);},700);
+  };
+
+  const simulateVerify=()=>{
+    const u={...user,verified:true};
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(u));
+    setUser(u);setMode('profile');
+  };
+
+  const logout=()=>{setUser(null);setMode('login');setForm({name:'',email:'',password:''});};
+
+  return html`<main className="min-h-screen max-w-md mx-auto px-4 py-16 sm:py-20">
+    <button onClick=${()=>go('home')} className="flex items-center gap-2 text-sm font-body text-black/38 hover:text-black transition-colors mb-10 min-h-[44px]"><${ArrowL} s=${15}/>Back to store</button>
+
+    ${mode==='login'&&html`<div>
+      <p className="text-[0.6rem] tracking-[0.32em] uppercase text-black/28 mb-2 font-body">Welcome back</p>
+      <h1 className="font-display font-black uppercase text-[2.8rem] tracking-[0.04em] leading-none mb-8">Sign in</h1>
+      <form onSubmit=${doLogin} className="space-y-4">
+        <div>
+          <label className="form-label">Email</label>
+          <input className="form-input" type="email" value=${form.email} onInput=${e=>set('email',e.target.value)} placeholder="you@example.com" autocomplete="email" required/>
+        </div>
+        <div>
+          <label className="form-label">Password</label>
+          <input className="form-input" type="password" value=${form.password} onInput=${e=>set('password',e.target.value)} placeholder="••••••••" autocomplete="current-password" required/>
+        </div>
+        ${err&&html`<p className="text-red-500 text-sm font-body">${err}</p>`}
+        <button type="submit" disabled=${loading} className="transition-btn w-full bg-near-black text-white py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase hover:bg-accent mt-2">${loading?'Signing in…':'Sign in'}</button>
+      </form>
+      <p className="text-sm font-body text-black/38 mt-6 text-center">Don't have an account? <button onClick=${()=>{setMode('signup');setErr('');}} className="text-near-black font-semibold underline underline-offset-2">Create one</button></p>
+    </div>`}
+
+    ${mode==='signup'&&html`<div>
+      <p className="text-[0.6rem] tracking-[0.32em] uppercase text-black/28 mb-2 font-body">Join AMARA</p>
+      <h1 className="font-display font-black uppercase text-[2.8rem] tracking-[0.04em] leading-none mb-8">Create account</h1>
+      <form onSubmit=${doSignup} className="space-y-4">
+        <div>
+          <label className="form-label">Full name</label>
+          <input className="form-input" value=${form.name} onInput=${e=>set('name',e.target.value)} placeholder="Maya Johnson" autocomplete="name" required/>
+        </div>
+        <div>
+          <label className="form-label">Email</label>
+          <input className="form-input" type="email" value=${form.email} onInput=${e=>set('email',e.target.value)} placeholder="you@example.com" autocomplete="email" required/>
+        </div>
+        <div>
+          <label className="form-label">Password</label>
+          <input className="form-input" type="password" value=${form.password} onInput=${e=>set('password',e.target.value)} placeholder="6+ characters" autocomplete="new-password" required/>
+        </div>
+        ${err&&html`<p className="text-red-500 text-sm font-body">${err}</p>`}
+        <button type="submit" disabled=${loading} className="transition-btn w-full bg-near-black text-white py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase hover:bg-accent mt-2">${loading?'Creating account…':'Create account'}</button>
+      </form>
+      <p className="text-sm font-body text-black/38 mt-6 text-center">Already have an account? <button onClick=${()=>{setMode('login');setErr('');}} className="text-near-black font-semibold underline underline-offset-2">Sign in</button></p>
+    </div>`}
+
+    ${mode==='verify'&&html`<div className="text-center py-8">
+      <div className="w-16 h-16 rounded-full bg-[#F8F4EE] flex items-center justify-center mx-auto mb-6">
+        <${Mail} s=${28}/>
+      </div>
+      <p className="text-[0.6rem] tracking-[0.32em] uppercase text-black/28 mb-2 font-body">Almost there</p>
+      <h1 className="font-display font-black uppercase text-[2.4rem] tracking-[0.04em] leading-none mb-4">Check your inbox</h1>
+      <p className="text-sm text-black/48 font-body leading-relaxed mb-2">We sent a verification link to</p>
+      <p className="font-semibold text-near-black font-body mb-8">${user?.email}</p>
+      <p className="text-[0.72rem] text-black/30 font-body mb-8 leading-relaxed">Didn't get it? Check your spam folder, or click below to simulate verification for this demo.</p>
+      <button onClick=${simulateVerify} className="transition-btn w-full border-2 border-near-black text-near-black py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase mb-3 hover:bg-near-black hover:text-white">✓ Simulate email verified</button>
+      <button onClick=${()=>{setMode('login');setErr('');}} className="text-[0.68rem] text-black/38 font-body underline underline-offset-2">Back to sign in</button>
+    </div>`}
+
+    ${mode==='profile'&&user&&html`<div>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <p className="text-[0.6rem] tracking-[0.32em] uppercase text-black/28 mb-1 font-body">Your account</p>
+          <h1 className="font-display font-black uppercase text-[2rem] tracking-[0.04em] leading-none">Hi, ${user.name.split(' ')[0]}.</h1>
+        </div>
+        <button onClick=${logout} className="text-[0.68rem] text-black/38 font-body underline underline-offset-2 hover:text-near-black min-h-[44px]">Sign out</button>
+      </div>
+      <div className="space-y-3">
+        <div className="border border-black/8 p-5">
+          <p className="text-[0.58rem] tracking-[0.24em] uppercase text-black/28 mb-3 font-body">Profile</p>
+          <div className="space-y-2 text-sm font-body">
+            <div className="flex justify-between"><span className="text-black/42">Name</span><span className="font-medium">${user.name}</span></div>
+            <div className="flex justify-between"><span className="text-black/42">Email</span><span className="font-medium">${user.email}</span></div>
+            <div className="flex justify-between"><span className="text-black/42">Member since</span><span className="font-medium">${user.joined}</span></div>
+            <div className="flex justify-between"><span className="text-black/42">Status</span>
+              <span className=${`font-medium text-[0.75rem] tracking-wide ${user.verified?'text-green-600':'text-amber-600'}`}>${user.verified?'✓ Verified':'Pending verification'}</span>
+            </div>
+          </div>
+        </div>
+        <div className="border border-black/8 p-5">
+          <p className="text-[0.58rem] tracking-[0.24em] uppercase text-black/28 mb-3 font-body">Orders</p>
+          <p className="text-sm text-black/36 font-body">No orders yet. <button onClick=${()=>go('home')} className="text-near-black font-semibold underline underline-offset-2">Shop the drop →</button></p>
+        </div>
+        <div className="border border-black/8 p-5">
+          <p className="text-[0.58rem] tracking-[0.24em] uppercase text-black/28 mb-3 font-body">Newsletter</p>
+          <p className="text-sm text-black/36 font-body mb-3">Get drop alerts and early access.</p>
+          <button onClick=${()=>go('newsletter')} className="transition-btn bg-near-black text-white px-6 py-2.5 text-[0.68rem] tracking-[0.2em] uppercase font-semibold hover:bg-accent">Join the list</button>
+        </div>
+      </div>
+    </div>`}
+  </main>`;
+}
+
+// ── Newsletter Page ───────────────────────────────────────────────────
+function NewsletterPage({go}){
+  const[email,setEmail]=useState('');
+  const[done,setDone]=useState(false);
+  const[loading,setLoading]=useState(false);
+
+  const PERKS=[
+    {icon:'⚡',title:'Drop alerts first',desc:'Know before anyone else when new pieces land.'},
+    {icon:'🔔',title:'Restock notifications',desc:'Get pinged when sold-out sizes come back.'},
+    {icon:'🎁',title:'Subscriber exclusives',desc:'Members-only deals, early access, and collabs.'},
+    {icon:'🚫',title:'Zero noise',desc:'We only email when it matters. No spam, ever.'},
+  ];
+
+  const submit=e=>{
+    e.preventDefault();
+    if(!email.trim())return;
+    setLoading(true);
+    setTimeout(()=>{setDone(true);setLoading(false);},1000);
+  };
+
+  return html`<main className="min-h-screen">
+    <div className="bg-near-black text-white py-24 sm:py-32 px-4 sm:px-6 text-center">
+      <button onClick=${()=>go('home')} className="flex items-center gap-2 text-sm font-body text-white/38 hover:text-white transition-colors mb-12 mx-auto min-h-[44px]"><${ArrowL} s=${15}/>Back</button>
+      <p className="text-[0.6rem] tracking-[0.38em] uppercase text-white/22 mb-4 font-body">Inner circle</p>
+      <h1 className="font-display font-black uppercase leading-[.9] text-[3.5rem] sm:text-[5rem] tracking-[0.02em] mb-5">The ${BRAND}<br/>List</h1>
+      <p className="text-white/42 text-sm sm:text-base font-body max-w-xs sm:max-w-sm mx-auto leading-relaxed mb-10">
+        This is where the culture lives. Be first in line for every drop, restock, and exclusive release.
+      </p>
+      ${done
+        ?html`<div className="max-w-sm mx-auto">
+          <div className="w-14 h-14 rounded-full bg-accent flex items-center justify-center mx-auto mb-5">
+            <${Check} s=${24}/>
+          </div>
+          <p className="font-display font-black text-[2rem] uppercase tracking-[0.12em] mb-2">You're on the list.</p>
+          <p className="text-white/38 text-sm font-body">We've sent a welcome to <span className="text-white/80 font-semibold">${email}</span></p>
+          <p className="text-white/22 text-[0.7rem] font-body mt-2">Check your inbox (and spam just in case).</p>
+        </div>`
+        :html`<form onSubmit=${submit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+          <input type="email" value=${email} onInput=${e=>setEmail(e.target.value)} placeholder="your@email.com" required className="flex-1 bg-transparent border border-white/18 px-4 py-4 text-white placeholder-white/22 text-sm font-body focus:outline-none focus:border-white/50 transition-colors"/>
+          <button type="submit" disabled=${loading} className="transition-btn bg-white text-near-black px-8 py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase hover:bg-accent hover:text-white flex-shrink-0">${loading?'Joining…':'Join now'}</button>
+        </form>`
+      }
+    </div>
+
+    <div className="py-20 px-4 sm:px-6 max-w-screen-md mx-auto">
+      <p className="text-center text-[0.6rem] tracking-[0.32em] uppercase text-black/28 mb-10 font-body">What you get</p>
+      <div className="grid sm:grid-cols-2 gap-6">
+        ${PERKS.map((p,i)=>html`<div key=${i} className="border border-black/8 p-6">
+          <p className="text-2xl mb-3">${p.icon}</p>
+          <p className="font-display font-bold uppercase tracking-[0.1em] text-sm mb-1">${p.title}</p>
+          <p className="text-sm text-black/48 font-body leading-relaxed">${p.desc}</p>
+        </div>`)}
+      </div>
+      <div className="mt-16 text-center">
+        <p className="text-sm text-black/36 font-body mb-4">Already on the list? Browse the current drop.</p>
+        <button onClick=${()=>go('home')} className="transition-btn bg-near-black text-white px-10 py-4 text-[0.7rem] font-semibold tracking-[0.22em] uppercase hover:bg-accent">Shop the drop</button>
+      </div>
+    </div>
+  </main>`;
 }
 
 // ── App ───────────────────────────────────────────────────────────────
 function App(){
   const[page,setPage]=useState('home');
   const[prod,setProd]=useState(null);
+  const[order,setOrder]=useState(null);
 
   const go=(target,p=null)=>{
     setPage(target);
     if(p)setProd(p);
     window.scrollTo({top:0,behavior:'instant'});
   };
+
+  const handleOrder=(orderData)=>{setOrder(orderData);};
 
   useEffect(()=>{
     const io=new IntersectionObserver((entries)=>{
@@ -728,13 +1194,19 @@ function App(){
     return()=>io.disconnect();
   },[page]);
 
+  const showNav=page!=='checkout'&&page!=='order-confirmed';
+
   return html`<${CartProvider}>
     <div className="min-h-screen">
-      <${Ticker}/>
-      <${Nav} go=${go}/>
-      <div className="pt-14">
+      ${showNav&&html`<${Ticker}/>`}
+      ${showNav&&html`<${Nav} go=${go}/>`}
+      <div className=${showNav?'pt-14':''}>
         ${page==='home'&&html`<${Home} go=${go}/>`}
         ${page==='product'&&prod&&html`<${PDP} key=${prod.id} p=${prod} back=${()=>go('home')} go=${go}/>`}
+        ${page==='checkout'&&html`<${Checkout} go=${go} onOrder=${handleOrder}/>`}
+        ${page==='order-confirmed'&&html`<${OrderConfirmed} order=${order} go=${go}/>`}
+        ${page==='account'&&html`<${AccountPage} go=${go}/>`}
+        ${page==='newsletter'&&html`<${NewsletterPage} go=${go}/>`}
       </div>
       <${CartDrawer} go=${go}/>
     </div>
